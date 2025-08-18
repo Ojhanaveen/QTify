@@ -1,35 +1,25 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./App.css";
+import Navbar from "./components/Navbar/Navbar";
+import HeroSection from "./components/Hero";
+import AlbumSection from "./components/AlbumSection";
+import NewAlbumsSection from "./components/NewAlbumsSection";
+import SongsSection from "./components/SongSection";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <Navbar />
+      <HeroSection />
+
+      {/* Top Albums Section */}
+      <AlbumSection title="Top Albums" />
+
+      {/* New Albums Section */}
+      <NewAlbumsSection title="New Albums" />
+
+      <SongsSection/>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
