@@ -11,18 +11,18 @@ const SongsSection = () => {
   const [activeTab, setActiveTab] = useState(0); // 0 = All
   const [scrollIndex, setScrollIndex] = useState(0);
 
-  useEffect(() => {
-    const fetchSongs = async () => {
-      const songsData = await getSongs();
-      setSongs(songsData);
-    };
-    const fetchGenres = async () => {
-      const genresData = await getGenres();
-      setGenres(["All", ...genresData]); // Add All tab
-    };
-    fetchSongs();
-    fetchGenres();
-  }, []);
+useEffect(() => {
+  const fetchSongs = async () => {
+    const songsData = await getSongs();
+    setSongs(Array.isArray(songsData) ? songsData : []);  // ✅
+  };
+  const fetchGenres = async () => {
+    const genresData = await getGenres();
+    setGenres(["All", ...(Array.isArray(genresData) ? genresData : [])]);  // ✅
+  };
+  fetchSongs();
+  fetchGenres();
+}, []);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);

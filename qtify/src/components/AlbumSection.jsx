@@ -11,13 +11,13 @@ const AlbumSection = ({ title }) => {
   const [showAll, setShowAll] = useState(false);
   const scrollRef = useRef();
 
-  useEffect(() => {
-    const fetchAlbums = async () => {
-      const data = await getTopAlbums();
-      setAlbums(data);
-    };
-    fetchAlbums();
-  }, []);
+ useEffect(() => {
+  const fetchAlbums = async () => {
+    const data = await getTopAlbums();
+    setAlbums(Array.isArray(data) ? data : []); 
+  };
+  fetchAlbums();
+}, []);
 
   const scroll = (direction) => {
     if (scrollRef.current) {

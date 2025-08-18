@@ -3,8 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Box, Typography, Grid, IconButton } from "@mui/material";
 import { getNewAlbums } from "../api";
 import AlbumCart from "./AlbumCart"; 
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules"; // v11+
+
 import "swiper/css";
 import "swiper/css/navigation";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
@@ -15,13 +14,14 @@ const NewAlbumsSection = ({ title }) => {
   const [showAll, setShowAll] = useState(false);
   const scrollRef = useRef();
 
-  useEffect(() => {
-    const fetchAlbums = async () => {
-      const data = await getNewAlbums();
-      setAlbums(data);
-    };
-    fetchAlbums();
-  }, []);
+ useEffect(() => {
+  const fetchAlbums = async () => {
+    const data = await getNewAlbums();
+    setAlbums(Array.isArray(data) ? data : []);  
+  };
+  fetchAlbums();
+}, []);
+
 
   const scroll = (direction) => {
     if (scrollRef.current) {
