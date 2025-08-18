@@ -17,7 +17,7 @@ const SearchBar = () => {
       }}
     >
       <InputBase
-        placeholder="search"
+        placeholder="Search"
         sx={{
           ml: 1,
           flex: 1,
