@@ -17,7 +17,7 @@ const SearchBar = () => {
       }}
     >
       <InputBase
-        placeholder="Search an album of your choice"
+        placeholder="Search"
         sx={{
           ml: 1,
           flex: 1,

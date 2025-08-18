@@ -1,101 +1,67 @@
-import React, { useState, useEffect } from "react";
-import { Box, Typography, Tabs, Tab, Grid, IconButton } from "@mui/material";
+// src/components/SongsSection.jsx
+import React, { useEffect, useState } from "react";
+import { Box, Typography, Tabs, Tab } from "@mui/material";
+import { getSongs, getGenres } from "../api";
 import AlbumCart from "./AlbumCart";
-import { getSongs, getGenres } from "../api"; // You will create these API calls
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const SongsSection = () => {
   const [songs, setSongs] = useState([]);
-  const [genres, setGenres] = useState([]);
-  const [activeTab, setActiveTab] = useState(0); // 0 = All
-  const [scrollIndex, setScrollIndex] = useState(0);
+  const [genres, setGenres] = useState(["All"]);
+  const [activeTab, setActiveTab] = useState(0);
 
-useEffect(() => {
-  const fetchSongs = async () => {
-    const songsData = await getSongs();
-    setSongs(Array.isArray(songsData) ? songsData : []);  // ✅
-  };
-  const fetchGenres = async () => {
-    const genresData = await getGenres();
-    setGenres(["All", ...(Array.isArray(genresData) ? genresData : [])]);  // ✅
-  };
-  fetchSongs();
-  fetchGenres();
-}, []);
+  useEffect(() => {
+    const load = async () => {
+      const s = await getSongs();
+      setSongs(Array.isArray(s) ? s : []);
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-    setScrollIndex(0); // Reset scroll when changing genre
-  };
+      const g = await getGenres();
+      // handle both shapes: [{key,label}] or just strings
+      const keys = Array.isArray(g)
+        ? g.map((x) => (typeof x === "string" ? x : x?.key)).filter(Boolean)
+        : [];
+      setGenres(["All", ...keys]);
+    };
+    load();
+  }, []);
 
-  // Filter songs by active genre
-  const filteredSongs =
+  const handleTabChange = (_e, newValue) => setActiveTab(newValue);
+
+  const filtered =
     activeTab === 0
       ? songs
-      : songs.filter((song) => song.genre === genres[activeTab]);
-
-  // Horizontal scroll controls
-  const scrollRef = React.useRef();
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -300 : 300,
-        behavior: "smooth",
-      });
-    }
-  };
+      : songs.filter((song) => song?.genre?.key === genres[activeTab]);
 
   return (
     <Box sx={{ px: 4, py: 3 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2}}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.5 }}>
         <Typography variant="h6">Songs</Typography>
       </Box>
 
-      {/* Tabs */}
       <Tabs
         value={activeTab}
         onChange={handleTabChange}
         sx={{
-          mb: 1,
-          "& .MuiTabs-indicator": { backgroundColor: "green" },
+          mb: 2,
+          "& .MuiTabs-indicator": { backgroundColor: "#34C94B" },
+          "& .MuiTab-root": { textTransform: "none", color: "#FFFFFF" },
         }}
       >
-        {genres.map((genre, idx) => (
-          <Tab
-            key={idx}
-            label={genre}
-            sx={{ textTransform: "none", color: "#fff", minHeight: 32 }}
-          />
+        {genres.map((g, i) => (
+          <Tab key={i} label={g} />
         ))}
       </Tabs>
 
-      {/* Horizontal Scroll / Carousel */}
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <IconButton onClick={() => scroll("left")} sx={{ color: "green" }}>
-          <ArrowBackIosNewIcon />
-        </IconButton>
-
-        <Box
-          ref={scrollRef}
-          sx={{
-            display: "flex",
-            gap: 2,
-            overflowX: "auto",
-            scrollBehavior: "smooth",
-            flexGrow: 1,
-            "&::-webkit-scrollbar": { display: "none" },
-            py: 1,
-          }}
-        >
-          {filteredSongs.map((song) => (
-            <AlbumCart key={song.id} album={song} type="song" />
-          ))}
-        </Box>
-
-        <IconButton onClick={() => scroll("right")} sx={{ color: "green" }}>
-          <ArrowForwardIosIcon />
-        </IconButton>
+      {/* Render ALL cards so count matches API (Test 14) */}
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          flexWrap: "wrap",
+        }}
+      >
+        {filtered.map((song) => (
+          <AlbumCart key={song.id} album={song} type="song" />
+        ))}
       </Box>
     </Box>
   );

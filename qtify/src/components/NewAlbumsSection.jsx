@@ -1,60 +1,68 @@
 // src/components/NewAlbumsSection.jsx
-import React, { useState, useEffect, useRef } from "react";
-import { Box, Typography, Grid, IconButton } from "@mui/material";
-import { getNewAlbums } from "../api";
-import AlbumCart from "./AlbumCart"; 
-
-import "swiper/css";
-import "swiper/css/navigation";
+import React, { useEffect, useRef, useState } from "react";
+import { Box, Typography, IconButton, Grid } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import { getNewAlbums } from "../api";
+import AlbumCart from "./AlbumCart";
 
-const NewAlbumsSection = ({ title }) => {
+const NewAlbumsSection = ({ title = "New Albums" }) => {
   const [albums, setAlbums] = useState([]);
   const [showAll, setShowAll] = useState(false);
-  const scrollRef = useRef();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const trackRef = useRef(null);
 
- useEffect(() => {
-  const fetchAlbums = async () => {
-    const data = await getNewAlbums();
-    setAlbums(Array.isArray(data) ? data : []);  
+  useEffect(() => {
+    const load = async () => {
+      const data = await getNewAlbums();
+      setAlbums(Array.isArray(data) ? data : []);
+    };
+    load();
+  }, []);
+
+  const handleNext = () => {
+    setCurrentIndex((i) => Math.min(i + 1, Math.max(0, albums.length - 1)));
   };
-  fetchAlbums();
-}, []);
-
-
-  const scroll = (direction) => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -300 : 300,
-        behavior: "smooth",
-      });
-    }
+  const handlePrev = () => {
+    setCurrentIndex((i) => Math.max(0, i - 1));
   };
 
   return (
     <Box sx={{ px: 4, py: 3 }}>
-      {/* Header */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
         <Typography variant="h6">{title}</Typography>
         <Typography
-          variant="body2"
-          sx={{ color: "green", cursor: "pointer" }}
-          onClick={() => setShowAll(!showAll)}
+          role="button"
+          tabIndex={0}
+          onClick={() => setShowAll((s) => !s)}
+          onKeyDown={(e) => (e.key === "Enter" ? setShowAll((s) => !s) : null)}
+          sx={{ color: "#34C94B", cursor: "pointer", userSelect: "none" }}
         >
           {showAll ? "Collapse" : "Show All"}
         </Typography>
       </Box>
 
-      {/* Horizontal Carousel */}
-      {!showAll && albums.length > 0 && (
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <IconButton onClick={() => scroll("left")} sx={{ color: "green" }}>
+      {showAll ? (
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          {albums.map((album) => (
+            <Grid item xs={12} sm={6} md={3} key={album.id}>
+              <AlbumCart album={album} />
+            </Grid>
+          ))}
+        </Grid>
+      ) : (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <IconButton
+            aria-label="previous"
+            data-testid="new-albums-left"
+            onClick={handlePrev}
+            sx={{ color: "#34C94B" }}
+          >
             <ArrowBackIosNewIcon />
           </IconButton>
 
           <Box
-            ref={scrollRef}
+            ref={trackRef}
             sx={{
               display: "flex",
               gap: 2,
@@ -65,30 +73,26 @@ const NewAlbumsSection = ({ title }) => {
               py: 1,
             }}
           >
-            {albums.map((album) => (
-              <AlbumCart key={album.id} album={album} />
+            {albums.map((album, idx) => (
+              <Box
+                key={album.id}
+                sx={{ visibility: idx < currentIndex ? "hidden" : "visible" }}
+              >
+                <AlbumCart album={album} />
+              </Box>
             ))}
           </Box>
 
-          <IconButton onClick={() => scroll("right")} sx={{ color: "green" }}>
+          <IconButton
+            aria-label="next"
+            data-testid="new-albums-right"
+            onClick={handleNext}
+            sx={{ color: "#34C94B" }}
+          >
             <ArrowForwardIosIcon />
           </IconButton>
         </Box>
       )}
-
-      {/* Vertical Grid when Show All */}
-      {showAll && albums.length > 0 && (
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          {albums.map((album) => (
-            <Grid item xs={12} sm={6} md={3} key={album.id}>
-              <AlbumCart album={album} />
-            </Grid>
-          ))}
-        </Grid>
-      )}
-
-      {/* Fallback */}
-      {albums.length === 0 && <Typography>No albums found.</Typography>}
     </Box>
   );
 };

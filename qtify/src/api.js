@@ -37,10 +37,15 @@ export const getSongs = async () => {
 export const getGenres = async () => {
   try {
     const response = await axios.get(`${BASE_URL}/genres`);
-    return response.data; // e.g., ["Rock", "Pop", "Jazz", "Blues"]
+    const raw = response.data;
+    // Some versions return { data: [...] }, some return [...]
+    const list = Array.isArray(raw) ? raw : raw?.data;
+    if (!Array.isArray(list)) return [];
+    return list.map((g) => (typeof g === "string" ? g : g.key)).filter(Boolean);
   } catch (error) {
     console.error("Error fetching genres:", error);
     return [];
   }
 };
+
 
